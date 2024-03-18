@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluence Proof 验证</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .success-message {
+            color: green;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .notice {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+            line-height: 1.6;
+            color: #333;
+        }
+        @media screen and (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>区块链交易页面</h1>
+        <div class="input-group">
+            <label for="ethAddress">ETH 地址（类似长这个样子：0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5 ）:</label>
+            <input type="text" id="ethAddress" placeholder="请输入ETH地址 （0x开头）">
+        </div>
+        <div class="input-group">
+            <label for="proof">Proof:</label>
+            <textarea id="proof" rows="4" placeholder="请输入Proof"></textarea>
+        </div>
+        <button id="verifyBtn">验证proof有效性</button>
+        <div id="resultMessage"></div>
+        <div class="notice">
+            本页面作用是验证对应key生成proof的有效性,并不会实际领取空投,只有proof上链之后才会领取到。<br>
+            如果不放心,可以从<a href="https://etherscan.io">etherscan.io</a>中随便找一个地址,并重新生成proof,并在本页面验证。
+        </div>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script>
+        document.getElementById('verifyBtn').addEventListener('click', async function() {
+    const ethAddress = document.getElementById('ethAddress').value;
+    const proof = document.getElementById('proof').value;
+
+    // 检查输入是否为空
+    if (!ethAddress || !proof) {
+        alert('请输入ETH地址和Proof');
+        return;
+    }
+
+    // 连接到以太坊网络(这里假设使用Ropsten测试网络)
+    const provider = new ethers.providers.JsonRpcProvider('https://ethereum-rpc.publicnode.com');
+
+    // 智能合约的地址和ABI(这里假设你已经部署了一个智能合约)
+    const contractAddress = '0x6081d7F04a8c31e929f25152d4ad37c83638C62b';
+    const contractABI = [{"inputs":[{"internalType":"contract FluenceToken","name":"_token","type":"address"},{"internalType":"contract Executor","name":"_executor","type":"address"},{"internalType":"bytes32","name":"_merkleRoot","type":"bytes32"},{"internalType":"uint256","name":"_halvePeriod","type":"uint256"},{"internalType":"uint256","name":"_lockupPeriod","type":"uint256"},{"internalType":"uint256","name":"_initialReward","type":"uint256"},{"internalType":"uint256","name":"_claimingPeriod","type":"uint256"},{"internalType":"address","name":"_canceler","type":"address"},{"internalType":"uint256","name":"_maxClaimedSupply","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"target","type":"address"}],"name":"AddressEmptyCode","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"AddressInsufficientBalance","type":"error"},{"inputs":[],"name":"ECDSAInvalidSignature","type":"error"},{"inputs":[{"internalType":"uint256","name":"length","type":"uint256"}],"name":"ECDSAInvalidSignatureLength","type":"error"},{"inputs":[{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"ECDSAInvalidSignatureS","type":"error"},{"inputs":[],"name":"FailedInnerCall","type":"error"},{"inputs":[{"internalType":"address","name":"token","type":"address"}],"name":"SafeERC20FailedOperation","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"userId","type":"uint256"},{"indexed":false,"internalType":"address","name":"account","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"bytes32","name":"leaf","type":"bytes32"}],"name":"Claimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"TransferUnclaimed","type":"event"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"canceler","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"userId","type":"uint32"},{"internalType":"bytes32[]","name":"merkleProof","type":"bytes32[]"},{"internalType":"address","name":"temporaryAddress","type":"address"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"claimTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"claimedSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"claimingEndTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"currentReward","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"deployTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"executor","outputs":[{"internalType":"contract Executor","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"halvePeriod","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"initialReward","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"index","type":"uint256"}],"name":"isClaimed","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isClaimingActive","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"lockedBalances","outputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"unlockTime","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lockupPeriod","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxClaimedSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"merkleRoot","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"token","outputs":[{"internalType":"contract FluenceToken","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+
+    // 创建智能合约实例
+    const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+    try {
+        const proofParts = proof.split(",");
+        const userId = parseInt(proofParts[0]);
+        const temporaryAddress = proofParts[1];
+        const signature = proofParts[2];
+        const merkleProofBase64 = proofParts[3];
+
+        // 解码 Base64 编码的 merkleProof
+        const merkleProofJSON = atob(merkleProofBase64);
+        const merkleProof = JSON.parse(merkleProofJSON);
+
+
+        const overrides = {
+            from: ethAddress
+        };
+        const result = await contract.callStatic.claimTokens(
+        userId,
+        merkleProof,
+        temporaryAddress,
+        signature
+    );
+        console.log("模拟调用结果:", result);
+        alert('验证成功');
+    } catch (error) {
+        console.error('验证失败:', error);
+        alert(error)
+        alert('验证失败');
+    }
+});
+    </script>
+</body>
+</html>
